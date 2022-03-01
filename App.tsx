@@ -4,6 +4,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { Navigator } from './src/navigator/Navigator';
 import { AuthProvider } from './src/context/AuthContext';
+import { ProductProvider } from './src/context/ProductsContext';
 
 // const AppState = ({ children }: { children: JSX.Element | JSX.Element[] }) => {
 //   return (
@@ -16,7 +17,9 @@ import { AuthProvider } from './src/context/AuthContext';
 const AppState = ({ children }: any) => {
   return (
     <AuthProvider>
-      { children }
+      <ProductProvider>
+        { children }
+      </ProductProvider>
     </AuthProvider>
   )
 }
