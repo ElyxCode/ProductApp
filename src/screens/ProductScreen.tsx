@@ -17,7 +17,7 @@ export const ProductScreen = ({ navigation, route }: Props) => {
 
     const { categories, isLoading } = useCategories();
 
-    const { loadProductById }  = useContext(ProductsContext);
+    const { loadProductById, addProduct, updateProduct }  = useContext(ProductsContext);
 
     const { _id, categoriaId, nombre, img, form, onChange, setFormValue } = useForm({
         _id: id,
@@ -30,14 +30,26 @@ export const ProductScreen = ({ navigation, route }: Props) => {
     // Change title name with product 
     useEffect(() => {
         navigation.setOptions({
-            headerTitle: (name) ? name : 'New product'
+            headerTitle: (nombre) ? nombre : 'without product name'
         });
 
-    }, []);
+    }, [nombre]);
 
     useEffect(() => {
         loadProduct();
-    }, [])
+    }, []);
+
+    const saveOrUpdate = async() => {
+
+        if(id.length > 0){
+            updateProduct(categoriaId, nombre, id);
+        }else{
+
+            const tempCategory = categoriaId || categories[0]._id; // for blank category
+            const newProduct = await addProduct(tempCategory, nombre);
+            onChange(newProduct._id, '_id');
+        }
+    }
     
 
     const loadProduct = async() => {
@@ -85,31 +97,35 @@ export const ProductScreen = ({ navigation, route }: Props) => {
                 
                 <Button
                     title='Save'
-                    onPress={() =>{}}
+                    onPress={ saveOrUpdate }
                     color='#5856D6'
                 />
                 
-                <View 
-                    style={{ 
-                        flexDirection: 'row', 
-                        justifyContent: 'center',
-                        marginTop: 10 
-                    }}
-                >
-                    <Button
-                        title='Camera'
-                        onPress={() =>{}}
-                        color='#5856D6'
-                    />
+                {
+                    (_id.length > 0) && (
+                    <View 
+                        style={{ 
+                            flexDirection: 'row', 
+                            justifyContent: 'center',
+                            marginTop: 10 
+                        }}
+                    >
+                        <Button
+                            title='Camera'
+                            onPress={ () =>{} }
+                            color='#5856D6'
+                        />
 
-                    <View style={{ width: 10 }} />
+                        <View style={{ width: 10 }} />
 
-                    <Button
-                        title='Gallery'
-                        onPress={() =>{}}
-                        color='#5856D6'
-                    />
-                </View>
+                        <Button
+                            title='Gallery'
+                            onPress={() =>{}}
+                            color='#5856D6'
+                        />
+                    </View>
+                    )
+                }
 
                 {/* <Text>
                     { JSON.stringify( form, null, 5 ) }
