@@ -1,8 +1,9 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Text, View, StyleSheet, TextInput, ScrollView, Button, Image } from 'react-native';
 
 import { StackScreenProps } from '@react-navigation/stack';
 import { Picker } from '@react-native-picker/picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 import { ProductsStackParams } from '../navigator/ProductsNavigator';
 import { useCategories } from '../hooks/useCategories';
@@ -15,9 +16,11 @@ export const ProductScreen = ({ navigation, route }: Props) => {
 
     const { id = '', name = '' } = route.params;
 
-    const { categories, isLoading } = useCategories();
+    const [ tempUri, setTempUri ] = useState<string>();
 
-    const { loadProductById, addProduct, updateProduct }  = useContext(ProductsContext);
+    const { categories } = useCategories();
+
+    const { loadProductById, addProduct, updateProduct, uploadImage }  = useContext(ProductsContext);
 
     const { _id, categoriaId, nombre, img, form, onChange, setFormValue } = useForm({
         _id: id,
@@ -62,6 +65,38 @@ export const ProductScreen = ({ navigation, route }: Props) => {
             nombre
         });
 
+    }
+
+    const takePhoto = () => {
+        launchCamera({
+            mediaType: 'photo',
+            quality: 0.1
+        }, (resp) => {
+
+            if(resp.didCancel) return;
+
+            if(!resp.assets?.[0].uri) return;
+
+            setTempUri(resp.assets?.[0].uri);
+            console.log(resp.assets?.[0].uri);
+            uploadImage(resp, _id);
+        });
+    }
+
+    const takePhotoFromGallery = () => {
+        launchImageLibrary({
+            mediaType: 'photo',
+            quality: 0.1
+        }, (resp) => {
+
+            if(resp.didCancel) return;
+
+            if(!resp.assets?.[0].uri) return;
+
+            setTempUri(resp.assets?.[0].uri);
+            console.log(resp.assets?.[0].uri);
+            uploadImage(resp, _id);
+        });
     }
 
     return (
@@ -112,7 +147,7 @@ export const ProductScreen = ({ navigation, route }: Props) => {
                     >
                         <Button
                             title='Camera'
-                            onPress={ () =>{} }
+                            onPress={ takePhoto }
                             color='#5856D6'
                         />
 
@@ -120,7 +155,7 @@ export const ProductScreen = ({ navigation, route }: Props) => {
 
                         <Button
                             title='Gallery'
-                            onPress={() =>{}}
+                            onPress={takePhotoFromGallery}
                             color='#5856D6'
                         />
                     </View>
@@ -132,19 +167,31 @@ export const ProductScreen = ({ navigation, route }: Props) => {
                 </Text> */}
 
                 {
-                    (img.length > 0) && (
-                    <Image
-                        source={{ uri: img }}
-                        style={{
-                            marginTop: 20,
-                            width: '100%',
-                            height: 300
-                        }}
-                    />
+                    (img.length > 0 && !tempUri) && (
+                        <Image
+                            source={{ uri: img }}
+                            style={{
+                                marginTop: 20,
+                                width: '100%',
+                                height: 300
+                            }}
+                        />
                     )
                 }
 
-                {/* TODO: Show temporal image */}
+                {/* Temporal image */}
+                {
+                    (tempUri) && (
+                        <Image
+                            source={{ uri: tempUri }}
+                            style={{
+                                marginTop: 20,
+                                width: '100%',
+                                height: 300
+                            }}
+                        />
+                    )
+                }
                 
 
             </ScrollView>
